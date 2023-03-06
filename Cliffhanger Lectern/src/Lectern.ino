@@ -238,7 +238,7 @@ void handle_messages() {
         messageAck = false;
         Serial.println("no response");
       } else {
-        if (Serial1.available() >= sizeof(response_message_t)) {
+        if ((unsigned)Serial1.available() >= sizeof(response_message_t)) {
           // Read in the appropriate number of bytes to fit the response
           Serial1.readBytes((byte *)&response, sizeof(response_message_t));
           //verify response start and end bytes

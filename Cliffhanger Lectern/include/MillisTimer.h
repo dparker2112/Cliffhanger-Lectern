@@ -29,7 +29,7 @@ public:
 
 private:
   unsigned long startTime;
-  int waitTime;
+  unsigned waitTime;
 };
 
 #endif
