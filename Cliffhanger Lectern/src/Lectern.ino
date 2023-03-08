@@ -108,6 +108,7 @@ MillisTimer messageResponseTimeoutTimer = { 120 };
 MillisTimer messageSendTimer = { 50 };
 MillisTimer messageErrorIndicatorTimer = { 1000 };
 
+
 bool ledState = false;
 bool errorFlag = false;
 bool messageAck = false;
@@ -121,6 +122,9 @@ bool playWinSound = false;
 bool playLoseSound = false;
 bool playDingSound = false;
 bool playWarningSound = false;
+bool playTravelSound = false;
+bool playDangerSound = false;
+bool playFallSound = false;
 
 void setup() {
   init_lectern_inputs();
@@ -155,7 +159,7 @@ void display_error() {
 
 //polls the buttons to get current inputs
 void read_inputs() {
-  static MillisTimer inputTimer = {10};
+  static MillisTimer inputTimer = {30};
   if(inputTimer.timeUp()) {
     inputTimer.reset();
     buttonStates.reset = digitalRead(reset);     //Cue 7 return to home position
@@ -280,6 +284,10 @@ void handle_messages() {
             Serial.print(incomingEndState);
             Serial.print(" travelling: ");
             Serial.println(incomingTravellingState);
+            playFallSound = incomingEndState;
+            playDangerSound = incomingWarningState;
+            playTravelSound = incomingTravellingState;
+            
           }
         }
       }
@@ -287,9 +295,109 @@ void handle_messages() {
   }
 }
 
-
+/*
+* this functions handles sound effects, when pins pulled low, sound plays
+* travel sound is hold-looping trigger, while idle sound is latching trigger
+*/
 void play_sounds() {
+  static bool travelSoundPlaying = false;
+  static bool idleSoundPlaying = false;
+  static bool idleButtonDebounced = true;
+  static MillisTimer soundHoldResetTimer= { 500 };
+  static bool soundHold = false;
+  //handle the travel sound
+  if(playTravelSound) {
+    //play travel sound
+    Serial.println("playing travel sound");
+    digitalWrite(travelSoundPin, LOW);
+    travelSoundPlaying = true;
+  } else {
+    if(travelSoundPlaying) {
+      playTravelSound = false;
+      playDingSound = true;
+      travelSoundPlaying = false;
+      Serial.println("turn off travel sound");
+      digitalWrite(travelSoundPin, HIGH);
+    }
+  }
 
+  //handle idle sound
+  if(playIdleSound) {
+    soundHoldResetTimer.reset();
+    playIdleSound = false;
+    if(idleButtonDebounced) {
+      idleButtonDebounced = false;
+      if(idleSoundPlaying) {
+        Serial.println("turning off idle sound");
+        digitalWrite(idleSoundPin, HIGH);
+        idleSoundPlaying = false;
+      } else {
+        idleSoundPlaying = true;
+        Serial.println("turning on idle sound");
+        digitalWrite(idleSoundPin, LOW);
+      }
+    }
+  }
+
+  //handle the win sound
+  if(playWinSound == true) {
+      playWinSound = false;
+      Serial.println("playing danger sound");
+      digitalWrite(winSoundPin, LOW);
+      soundHold = true;
+      soundHoldResetTimer.reset();
+  }
+
+
+  //handle the lose sound
+  if(playLoseSound == true) {
+      playLoseSound = false;
+      Serial.println("playing danger sound");
+      digitalWrite(playLoseSound, LOW);
+      soundHold = true;
+      soundHoldResetTimer.reset();
+  }
+
+  //handle the danger sound
+  if(playDangerSound == true) {
+      playDangerSound = false;
+      Serial.println("playing danger sound");
+      digitalWrite(dangerSoundPin, LOW);
+      soundHold = true;
+      soundHoldResetTimer.reset();
+  }
+
+  //handle the fall sound
+  if(playFallSound == true) {
+      playFallSound = false;
+      Serial.println("playing fall sound");
+      digitalWrite(fallSoundPin, LOW);
+      soundHold = true;
+      soundHoldResetTimer.reset();
+  }
+
+  //handle the ding sound
+  if(playDingSound == true) {
+      playDingSound = false;
+      Serial.println("playing ding sound");
+      digitalWrite(dingSoundPin, LOW);
+      soundHold = true;
+      soundHoldResetTimer.reset();
+  }
+
+  if(soundHold) {
+    if(soundHoldResetTimer.timeUp()) {
+      soundHold = false;
+      //return hold pins to high
+      digitalWrite(dingSoundPin, HIGH);
+      digitalWrite(fallSoundPin, HIGH);
+      digitalWrite(dangerSoundPin, HIGH);
+      digitalWrite(winSoundPin, HIGH);
+      digitalWrite(loseSoundPin, HIGH);
+      //reenable toggle for idle
+      idleButtonDebounced = true;
+    }
+  }
 }
 
 
