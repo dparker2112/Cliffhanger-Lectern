@@ -91,6 +91,7 @@ typedef struct response_message_t {
   uint8_t startByte;
   uint8_t warningState;
   uint8_t endState;
+  uint8_t travelState;
   message_status_t messageStatus;
   uint8_t endByte;
 } response_message_t;
@@ -113,6 +114,14 @@ bool messageAck = false;
 
 uint8_t incomingWarningState = 0;
 uint8_t incomingEndState = 0;
+uint8_t incomingTravellingState = 0;
+
+bool playIdleSound = false;
+bool playWinSound = false;
+bool playLoseSound = false;
+bool playDingSound = false;
+bool playWarningSound = false;
+
 void setup() {
   init_lectern_inputs();
   init_lectern_outputs();
@@ -124,6 +133,7 @@ void loop() {
   read_inputs();
   handle_messages();
   display_error();
+  play_sounds();
 }
 
 //blinks led when communication is broken
@@ -157,17 +167,21 @@ void read_inputs() {
     buttonStates.win = digitalRead(win);     //Cue 4 winning sound 1x
     if(buttonStates.win == LOW) {
       Serial.println("play win sound");
+      playWinSound = true;
       //play win sound
     } 
-    
+
+
     buttonStates.lose = digitalRead(lose);     //Cue 5 losing sound 1x
     if(buttonStates.lose == LOW) {
       Serial.println("play lose sound");
+      playLoseSound = true;
       //play lose sound
     } 
     buttonStates.idle = digitalRead(idle);    //Cue 6 idle music loop
     if(buttonStates.idle == LOW) {
       Serial.println("play idle sound");
+      playIdleSound = true;
       //play win sound
     } 
 
@@ -259,16 +273,25 @@ void handle_messages() {
 
             incomingWarningState = response.warningState;
             incomingEndState = response.endState;
+            incomingTravellingState = response.travelState;
             Serial.print("warning: ");
             Serial.print(incomingWarningState);
             Serial.print(" end: ");
-            Serial.println(incomingEndState);
+            Serial.print(incomingEndState);
+            Serial.print(" travelling: ");
+            Serial.println(incomingTravellingState);
           }
         }
       }
       break;
   }
 }
+
+
+void play_sounds() {
+
+}
+
 
 //set pins as inputs
 void init_lectern_inputs() {
