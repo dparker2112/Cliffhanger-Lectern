@@ -227,6 +227,7 @@ void handle_messages() {
           //send new message
         }
         digitalWrite(max845_enable, HIGH);
+        delayMicroseconds(800);
         Serial1.write((byte *)&messageOut, sizeof(master_message_t));
         delayMicroseconds(800);
         digitalWrite(max845_enable, LOW);
