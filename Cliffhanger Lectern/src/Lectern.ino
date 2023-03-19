@@ -41,7 +41,7 @@ const int win = 8;         //Cue 4 : plays win sound
 const int buzz = 9;        //Cue 5 : plays buzz sound
 const int idle = 10;       //Cue 6 : plays idle music
 const int unused = 11;     //Cue 8 
-const int unused = 12;     //Cue 9
+const int unused2 = 12;     //Cue 9
 //********************************SOUND TRIGGERS**********************************************
 const int travelSoundPin = 30;  //pin 1 on sound board : Hold Looping Trigger
 const int fallSoundPin = 31;    //pin 2 on sound board : Basic Trigger
@@ -180,13 +180,14 @@ void read_inputs() {
       //play win sound
     } 
 
-
+  /*
     buttonStates.lose = digitalRead(lose);     //Cue 5 losing sound 1x
     if(buttonStates.lose == LOW) {
       Serial.println("play lose sound");
       playLoseSound = true;
       //play lose sound
-    } 
+    }
+    */ 
     buttonStates.idle = digitalRead(idle);    //Cue 6 idle music loop
     if(buttonStates.idle == LOW) {
       Serial.println("play idle sound");
@@ -331,18 +332,13 @@ void play_sounds() {
   if(playIdleSound) {
     soundHoldResetTimer.reset();
     playIdleSound = false;
-    if(idleButtonDebounced) {
+    //if(idleButtonDebounced) {
       idleButtonDebounced = false;
-      if(idleSoundPlaying) {
-        Serial.println("turning off idle sound");
-        digitalWrite(idleSoundPin, HIGH);
-        idleSoundPlaying = false;
-      } else {
-        idleSoundPlaying = true;
-        Serial.println("turning on idle sound");
-        digitalWrite(idleSoundPin, LOW);
-      }
-    }
+      soundHold = true;
+      soundHoldResetTimer.reset();
+      Serial.println("toggle idle sound");
+      digitalWrite(idleSoundPin, LOW);
+    //}
   }
 
   //handle the win sound
@@ -400,8 +396,9 @@ void play_sounds() {
       digitalWrite(dangerSoundPin, HIGH);
       digitalWrite(winSoundPin, HIGH);
       digitalWrite(loseSoundPin, HIGH);
+      digitalWrite(idleSoundPin, HIGH);
       //reenable toggle for idle
-      idleButtonDebounced = true;
+      //idleButtonDebounced = true;
     }
   }
 }
@@ -414,7 +411,7 @@ void init_lectern_inputs() {
   pinMode(space24, INPUT_PULLUP);     //Cue 2 go to space 24
   pinMode(manual, INPUT_PULLUP);      //Cue 3 manual move
   pinMode(win, INPUT_PULLUP);         //Cue 4 winning sound 1x
-  pinMode(lose, INPUT_PULLUP);        //Cue 5 losing sound 1x
+  //pinMode(lose, INPUT_PULLUP);        //Cue 5 losing sound 1x
   pinMode(idle, INPUT_PULLUP);        //Cue 6 idle music loop
 }
 
