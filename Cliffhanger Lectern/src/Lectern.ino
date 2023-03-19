@@ -51,8 +51,8 @@ const int loseSoundPin = 34;    //pin 5 on sound board : Basic Trigger
 const int idleSoundPin = 35;    //pin 6 on sound board : Latching Loop Trigger
 const int dangerSoundPin = 36;  //pin 7 on sound board : Basic Trigger
 const int resetSoundPin = 37;   //pin 8 on sound board : Basic Trigger
-const int travelLSoundPin = 38; //pin 9 on sound board : Latching Loop Trigger
-
+//const int travelLSoundPin = 38; //pin 9 on sound board : Latching Loop Trigger
+const int buzzSoundPin = 38;
 const int fallSoundLength = 500; //length of fall sound in ms
 
 const int max845_enable = 2;
@@ -72,7 +72,8 @@ typedef enum lectern_state_t {
   RANDOM_MOVE = 1,
   SPACE24 = 2,
   MANUAL = 3,
-  NONE = 4
+  NONE = 4,
+  NO_MESSAGE = 5
 } lectern_state_t;
 
 
@@ -84,6 +85,7 @@ typedef struct button_state_t {
   uint8_t win;
   uint8_t lose;
   uint8_t idle;
+  uint8_t buzz;
 } button_state_t;
 
 button_state_t buttonStates = {1};
@@ -133,6 +135,7 @@ bool playTravelSound = false;
 bool playDangerSound = false;
 bool playFallSound = false;
 bool playResetSound = false;
+bool playBuzzSound = false;
 
 void setup() {
   init_lectern_inputs();
@@ -198,10 +201,18 @@ void read_inputs() {
       //play win sound
     } 
 
+    buttonStates.buzz = digitalRead(buzz);    //Cue 5 buzz sound
+    if(buttonStates.buzz == LOW) {
+      Serial.println("play buzz sound");
+      playBuzzSound = true;
+      //play buzz sound
+    } 
+
+
     //interpret button presses
     if(buttonStates.reset == LOW) {
       currentState = RESET;
-      Serial.println("reset");
+      //Serial.println("reset");
       Serial.println("play reset sound");
       playResetSound = true;
     } else if(buttonStates.random_move == LOW) {
@@ -213,6 +224,8 @@ void read_inputs() {
     } else if(buttonStates.manual == LOW) {
       currentState = MANUAL;
       Serial.println("manual");
+    } else {
+      currentState = NONE;
     }
     
   }
@@ -239,8 +252,11 @@ void handle_messages() {
         }
         digitalWrite(max845_enable, HIGH);
         delayMicroseconds(2000);
+        if(currentState == RESET) {
+          Serial.print("reset");
+        }
         Serial1.write((byte *)&messageOut, sizeof(master_message_t));
-        delayMicroseconds(800);
+        delayMicroseconds(2000);
         digitalWrite(max845_enable, LOW);
         /*
         Serial.print("message sent ");
@@ -281,21 +297,26 @@ void handle_messages() {
               //errorFlag = true;
               messageAck = true;
               //Serial.println("message ACK");
-              currentState = NONE;
+              //currentState = NONE;
             } else {
               Serial.println("message NACK");
+              if(currentState == RESET) {
+                //currentState = NONE;
+              }
               //if needed can add additional error state here
             }
 
             incomingWarningState = response.warningState;
             incomingEndState = response.endState;
             incomingTravellingState = response.travelState;
+            
             Serial.print("warning: ");
             Serial.print(incomingWarningState);
             Serial.print(" end: ");
             Serial.print(incomingEndState);
             Serial.print(" travelling: ");
             Serial.println(incomingTravellingState);
+            
             playFallSound = incomingEndState;
             playDangerSound = incomingWarningState;
             playTravelSound = incomingTravellingState;
@@ -320,7 +341,9 @@ void play_sounds() {
   //handle the travel sound
   if(playTravelSound && !playFallSound) {
     //play travel sound
-    Serial.println("playing travel sound");
+    if(!travelSoundPlaying) {
+      Serial.println("playing travel sound");
+    }
     digitalWrite(travelSoundPin, LOW);
     travelSoundPlaying = true;
   } else {
@@ -361,6 +384,15 @@ void play_sounds() {
       playLoseSound = false;
       Serial.println("playing lose sound");
       digitalWrite(loseSoundPin, LOW);
+      soundHold = true;
+      soundHoldResetTimer.reset();
+  }
+
+    //handle the lose sound
+  if(playBuzzSound == true) {
+      playBuzzSound = false;
+      Serial.println("playing buzz sound");
+      digitalWrite(buzzSoundPin, LOW);
       soundHold = true;
       soundHoldResetTimer.reset();
   }
@@ -422,6 +454,7 @@ void play_sounds() {
       digitalWrite(loseSoundPin, HIGH);
       digitalWrite(idleSoundPin, HIGH);
       digitalWrite(resetSoundPin, HIGH);
+      digitalWrite(buzzSoundPin, HIGH);
       //reenable toggle for idle
       //idleButtonDebounced = true;
     }
@@ -437,6 +470,7 @@ void init_lectern_inputs() {
   pinMode(manual, INPUT_PULLUP);      //Cue 3 manual move
   pinMode(win, INPUT_PULLUP);         //Cue 4 winning sound 1x
   //pinMode(lose, INPUT_PULLUP);        //Cue 5 losing sound 1x
+  pinMode(buzz, INPUT_PULLUP);        //Cue 5 losing sound 1x
   pinMode(idle, INPUT_PULLUP);        //Cue 6 idle music loop
 }
 
@@ -449,6 +483,7 @@ void init_lectern_outputs() {
   pinMode(loseSoundPin, OUTPUT);
   pinMode(idleSoundPin, OUTPUT);
   pinMode(dangerSoundPin, OUTPUT);
+  pinMode(buzzSoundPin, OUTPUT);
 
   pinMode(LED_BUILTIN, OUTPUT);  //built in led
   pinMode(max845_enable, OUTPUT);
@@ -461,4 +496,5 @@ void init_lectern_outputs() {
   digitalWrite(loseSoundPin, HIGH);
   digitalWrite(idleSoundPin, HIGH);
   digitalWrite(dangerSoundPin, HIGH);
+  digitalWrite(buzzSoundPin, HIGH);
 }
