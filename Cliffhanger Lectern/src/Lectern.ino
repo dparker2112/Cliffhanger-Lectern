@@ -202,7 +202,7 @@ void read_inputs() {
     if(buttonStates.reset == LOW) {
       currentState = RESET;
       Serial.println("reset");
-      Serial.println("play idle sound");
+      Serial.println("play reset sound");
       playResetSound = true;
     } else if(buttonStates.random_move == LOW) {
       currentState = RANDOM_MOVE;
