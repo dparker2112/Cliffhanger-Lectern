@@ -14,21 +14,22 @@
   4)Sound track win..play sound ding ding ding ding and winning music
   5)Sound track lose…loosing sound, and music
   6)Idle music.
-  7)Resets game to start position moves goat to starting position. No sound.
+  7)Resets game to start position moves goat to starting position. Plays Reset Game Music.
 ********************************Electromagnetic triggers***************************************
   An electromagnet creates a “start of game” sound when he crosses position one.
   An electromagnet at the top of the mountain would trigger a sound effect - falling yodel sound
   Perhaps another electromagnet could trigger red flashing lighting
     and a sound effect that warns that the goat is going to fall off when it passes.
 *********************************Pinouts for Sound Board***************************************
-  T01HOLDL.ogg                            Travel Music
+  T01HOLDL.ogg                            Travel Music - loops as long as pin is LOW
   T02.ogg                                 Losing (Falling Yodel) Sound
   T03.ogg                                 Winning Sound
   T04.ogg                                 1 Ding
   T05.ogg                                 Danger Sound
-  T06LATCH.ogg                            Idle Music
+  T06LATCH.ogg                            Idle Music - loops until pin LOW second time
   T07.ogg                                 Buzz
   T08.ogg                                 Reset Game Music
+  T09LATCH.ogg                            Travel Music - loops until pin LOW second time
 */
 /*Serial1 pins 19(RX), 18(TX)*/
 //********************************LECTERN BUTTONS*********************************************
@@ -37,8 +38,10 @@ const int randomMove = 5;  //Cue 1 : Moves goat random distance between resetPin
 const int space24 = 6;     //Cue 2 : Moves goat to just before dangerPin (space 24)
 const int manual = 7;      //Cue 3 : Moves goat until button is released
 const int win = 8;         //Cue 4 : plays win sound
-const int lose = 9;        //Cue 5 : plays lose sound
-const int idle = 10;       //Cue 6 : plays win sound
+const int buzz = 9;        //Cue 5 : plays buzz sound
+const int idle = 10;       //Cue 6 : plays idle music
+const int unused = 11;     //Cue 8 
+const int unused = 12;     //Cue 9
 //********************************SOUND TRIGGERS**********************************************
 const int travelSoundPin = 30;  //pin 1 on sound board : Hold Looping Trigger
 const int fallSoundPin = 31;    //pin 2 on sound board : Basic Trigger
@@ -47,6 +50,8 @@ const int dingSoundPin = 33;    //pin 4 on sound board : Basic Trigger
 const int loseSoundPin = 34;    //pin 5 on sound board : Basic Trigger
 const int idleSoundPin = 35;    //pin 6 on sound board : Latching Loop Trigger
 const int dangerSoundPin = 36;  //pin 7 on sound board : Basic Trigger
+const int resetSoundPin = 37;   //pin 8 on sound board : Basic Trigger
+const int travelLSoundPin = 38; //pin 9 on sound board : Latching Loop Trigger
 
 const int max845_enable = 2;
 
