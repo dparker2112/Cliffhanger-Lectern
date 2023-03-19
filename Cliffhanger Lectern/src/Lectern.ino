@@ -53,6 +53,8 @@ const int dangerSoundPin = 36;  //pin 7 on sound board : Basic Trigger
 const int resetSoundPin = 37;   //pin 8 on sound board : Basic Trigger
 const int travelLSoundPin = 38; //pin 9 on sound board : Latching Loop Trigger
 
+const int fallSoundLength = 500; //length of fall sound in ms
+
 const int max845_enable = 2;
 
 typedef enum message_status_t {
@@ -130,6 +132,7 @@ bool playWarningSound = false;
 bool playTravelSound = false;
 bool playDangerSound = false;
 bool playFallSound = false;
+bool playResetSound = false;
 
 void setup() {
   init_lectern_inputs();
@@ -199,6 +202,8 @@ void read_inputs() {
     if(buttonStates.reset == LOW) {
       currentState = RESET;
       Serial.println("reset");
+      Serial.println("play idle sound");
+      playResetSound = true;
     } else if(buttonStates.random_move == LOW) {
       currentState = RANDOM_MOVE;
       Serial.println("random move");
@@ -233,7 +238,7 @@ void handle_messages() {
           //send new message
         }
         digitalWrite(max845_enable, HIGH);
-        delayMicroseconds(800);
+        delayMicroseconds(2000);
         Serial1.write((byte *)&messageOut, sizeof(master_message_t));
         delayMicroseconds(800);
         digitalWrite(max845_enable, LOW);
@@ -308,12 +313,12 @@ void handle_messages() {
 */
 void play_sounds() {
   static bool travelSoundPlaying = false;
-  static bool idleSoundPlaying = false;
-  static bool idleButtonDebounced = true;
+  //static bool idleSoundPlaying = false;
+  //static bool idleButtonDebounced = true;
   static MillisTimer soundHoldResetTimer= { 500 };
   static bool soundHold = false;
   //handle the travel sound
-  if(playTravelSound) {
+  if(playTravelSound && !playFallSound) {
     //play travel sound
     Serial.println("playing travel sound");
     digitalWrite(travelSoundPin, LOW);
@@ -333,7 +338,7 @@ void play_sounds() {
     soundHoldResetTimer.reset();
     playIdleSound = false;
     //if(idleButtonDebounced) {
-      idleButtonDebounced = false;
+      //idleButtonDebounced = false;
       soundHold = true;
       soundHoldResetTimer.reset();
       Serial.println("toggle idle sound");
@@ -344,7 +349,7 @@ void play_sounds() {
   //handle the win sound
   if(playWinSound == true) {
       playWinSound = false;
-      Serial.println("playing danger sound");
+      Serial.println("playing win sound");
       digitalWrite(winSoundPin, LOW);
       soundHold = true;
       soundHoldResetTimer.reset();
@@ -354,16 +359,26 @@ void play_sounds() {
   //handle the lose sound
   if(playLoseSound == true) {
       playLoseSound = false;
-      Serial.println("playing danger sound");
-      digitalWrite(playLoseSound, LOW);
+      Serial.println("playing lose sound");
+      digitalWrite(loseSoundPin, LOW);
       soundHold = true;
       soundHoldResetTimer.reset();
   }
 
+  //handle the reset sound
+  if(playResetSound == true) {
+      playResetSound = false;
+      Serial.println("playing reset sound"); 
+      digitalWrite(resetSoundPin, LOW);
+      soundHold = true;
+      soundHoldResetTimer.reset();
+  }
+
+
   //handle the danger sound
   if(playDangerSound == true) {
       playDangerSound = false;
-      Serial.println("playing danger sound");
+      Serial.println("playing danger sound"); 
       digitalWrite(dangerSoundPin, LOW);
       soundHold = true;
       soundHoldResetTimer.reset();
@@ -374,6 +389,15 @@ void play_sounds() {
       playFallSound = false;
       Serial.println("playing fall sound");
       digitalWrite(fallSoundPin, LOW);
+      //soundHold = true;
+      //soundHoldResetTimer.reset();
+      delay(50);
+      digitalWrite(fallSoundPin, HIGH);
+      delay(fallSoundLength);
+      //play lose music
+      Serial.println("playing lose sound");
+      digitalWrite(loseSoundPin, LOW);
+      
       soundHold = true;
       soundHoldResetTimer.reset();
   }
@@ -397,6 +421,7 @@ void play_sounds() {
       digitalWrite(winSoundPin, HIGH);
       digitalWrite(loseSoundPin, HIGH);
       digitalWrite(idleSoundPin, HIGH);
+      digitalWrite(resetSoundPin, HIGH);
       //reenable toggle for idle
       //idleButtonDebounced = true;
     }
