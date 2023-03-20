@@ -52,7 +52,7 @@ const int idleSoundPin = 35;    //pin 6 on sound board : Latching Loop Trigger
 const int dangerSoundPin = 36;  //pin 7 on sound board : Basic Trigger
 const int resetSoundPin = 37;   //pin 8 on sound board : Basic Trigger
 //const int travelLSoundPin = 38; //pin 9 on sound board : Latching Loop Trigger
-const int buzzSoundPin = 38;
+const int buzzSoundPin = 39;
 const int fallSoundLength = 500; //length of fall sound in ms
 
 const int max845_enable = 2;
