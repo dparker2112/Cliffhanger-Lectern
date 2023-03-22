@@ -378,15 +378,15 @@ void play_sounds() {
 
 
   //handle the lose sound
-  if(playLoseSound == true) {
+  /*if(playLoseSound == true) {
       playLoseSound = false;
       Serial.println("playing lose sound");
       digitalWrite(loseSoundPin, LOW);
       soundHold = true;
       soundHoldResetTimer.reset();
-  }
+  }*/
 
-    //handle the lose sound
+    //handle the Buzz sound
   if(playBuzzSound == true) {
       playBuzzSound = false;
       Serial.println("playing buzz sound");
@@ -449,7 +449,7 @@ void play_sounds() {
       digitalWrite(fallSoundPin, HIGH);
       digitalWrite(dangerSoundPin, HIGH);
       digitalWrite(winSoundPin, HIGH);
-      digitalWrite(loseSoundPin, HIGH);
+      //digitalWrite(loseSoundPin, HIGH);
       digitalWrite(idleSoundPin, HIGH);
       digitalWrite(resetSoundPin, HIGH);
       digitalWrite(buzzSoundPin, HIGH);
@@ -478,7 +478,7 @@ void init_lectern_outputs() {
   pinMode(fallSoundPin, OUTPUT);
   pinMode(winSoundPin, OUTPUT);
   pinMode(dingSoundPin, OUTPUT);
-  pinMode(loseSoundPin, OUTPUT);
+  //pinMode(loseSoundPin, OUTPUT);
   pinMode(idleSoundPin, OUTPUT);
   pinMode(dangerSoundPin, OUTPUT);
   pinMode(buzzSoundPin, OUTPUT);
@@ -491,7 +491,7 @@ void init_lectern_outputs() {
   digitalWrite(fallSoundPin, HIGH);
   digitalWrite(winSoundPin, HIGH);
   digitalWrite(dingSoundPin, HIGH);
-  digitalWrite(loseSoundPin, HIGH);
+  //digitalWrite(loseSoundPin, HIGH);
   digitalWrite(idleSoundPin, HIGH);
   digitalWrite(dangerSoundPin, HIGH);
   digitalWrite(buzzSoundPin, HIGH);
