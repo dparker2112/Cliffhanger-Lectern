@@ -21,7 +21,7 @@
   Perhaps another electromagnet could trigger red flashing lighting
     and a sound effect that warns that the goat is going to fall off when it passes.
 *********************************Pinouts for Sound Board***************************************
-  T01HOLDL.ogg                            Travel Music - loops as long as pin is LOW
+  T01LATCH.ogg                            Travel Music - loops until pin LOW second time
   T02.ogg                                 Losing (Falling Yodel) Sound
   T03.ogg                                 Winning Sound
   T04.ogg                                 1 Ding
@@ -29,7 +29,6 @@
   T06LATCH.ogg                            Idle Music - loops until pin LOW second time
   T07.ogg                                 Buzz
   T08.ogg                                 Reset Game Music
-  T09LATCH.ogg                            Travel Music - loops until pin LOW second time
 */
 /*Serial1 pins 19(RX), 18(TX)*/
 //********************************LECTERN BUTTONS*********************************************
@@ -40,19 +39,18 @@ const int manual = 7;      //Cue 3 : Moves goat until button is released
 const int win = 8;         //Cue 4 : plays win sound
 const int buzz = 9;        //Cue 5 : plays buzz sound
 const int idle = 10;       //Cue 6 : plays idle music
-const int unused = 11;     //Cue 8 
-const int unused2 = 12;     //Cue 9
+const int unused1 = 11;     //Cue 8 
+const int unused2 = 12;    //Cue 9
 //********************************SOUND TRIGGERS**********************************************
-const int travelSoundPin = 30;  //pin 1 on sound board : Hold Looping Trigger
-const int fallSoundPin = 31;    //pin 2 on sound board : Basic Trigger
-const int winSoundPin = 32;     //pin 3 on sound board : Basic Trigger
-const int dingSoundPin = 33;    //pin 4 on sound board : Basic Trigger
-const int loseSoundPin = 34;    //pin 5 on sound board : Basic Trigger
-const int idleSoundPin = 35;    //pin 6 on sound board : Latching Loop Trigger
-const int dangerSoundPin = 36;  //pin 7 on sound board : Basic Trigger
-const int resetSoundPin = 37;   //pin 8 on sound board : Basic Trigger
-//const int travelLSoundPin = 38; //pin 9 on sound board : Latching Loop Trigger
-const int buzzSoundPin = 39;
+const int travelSoundPin = 30;   //pin 1 on sound board : Latching Looping Trigger
+const int fallSoundPin = 31;     //pin 2 on sound board : Basic Trigger
+const int winSoundPin = 32;      //pin 3 on sound board : Basic Trigger
+const int dingSoundPin = 33;     //pin 4 on sound board : Basic Trigger
+const int dangerSoundPin = 34;   //pin 5 on sound board : Basic Trigger
+const int idleSoundPin = 35;     //pin 6 on sound board : Latching Loop Trigger
+const int buzzSoundPin = 36;     //pin 7 on sound board : Basic Trigger
+const int resetSoundPin = 37;    //pin 8 on sound board : Basic Trigger
+
 const int fallSoundLength = 500; //length of fall sound in ms
 
 const int max845_enable = 2;
