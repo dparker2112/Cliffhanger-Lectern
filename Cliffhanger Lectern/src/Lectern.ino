@@ -135,6 +135,8 @@ bool playFallSound = false;
 bool playResetSound = false;
 bool playBuzzSound = false;
 
+bool gameOver = true;
+
 void setup() {
   init_lectern_inputs();
   init_lectern_outputs();
@@ -209,17 +211,18 @@ void read_inputs() {
 
     //interpret button presses
     if(buttonStates.reset == LOW) {
+      gameOver = false;
       currentState = RESET;
       //Serial.println("reset");
       Serial.println("play reset sound");
       playResetSound = true;
-    } else if(buttonStates.random_move == LOW) {
+    } else if(buttonStates.random_move == LOW && !gameOver) {
       currentState = RANDOM_MOVE;
       Serial.println("random move");
-    } else if(buttonStates.space24 == LOW) {
+    } else if(buttonStates.space24 == LOW && !gameOver) {
       currentState = SPACE24;
       Serial.println("space24");
-    } else if(buttonStates.manual == LOW) {
+    } else if(buttonStates.manual == LOW && !gameOver) {
       currentState = MANUAL;
       Serial.println("manual");
     } else {
@@ -341,16 +344,17 @@ void play_sounds() {
     //play travel sound
     if(!travelSoundPlaying) {
       Serial.println("playing travel sound");
+      digitalWrite(travelSoundPin, LOW);
+      travelSoundPlaying = true;
     }
-    digitalWrite(travelSoundPin, LOW);
-    travelSoundPlaying = true;
+
   } else {
     if(travelSoundPlaying) {
       playTravelSound = false;
       playDingSound = true;
       travelSoundPlaying = false;
       Serial.println("turn off travel sound");
-      digitalWrite(travelSoundPin, HIGH);
+      digitalWrite(travelSoundPin, LOW);
     }
   }
 
@@ -416,18 +420,17 @@ void play_sounds() {
 
   //handle the fall sound
   if(playFallSound == true) {
+      //disable travel sound
+      if(travelSoundPlaying) {
+        playTravelSound = false;
+      }
+
+      delay(4);
       playFallSound = false;
+      gameOver = true;
       Serial.println("playing fall sound");
       digitalWrite(fallSoundPin, LOW);
-      //soundHold = true;
-      //soundHoldResetTimer.reset();
-      delay(50);
-      digitalWrite(fallSoundPin, HIGH);
-      delay(fallSoundLength);
-      //play lose music
-      Serial.println("playing lose sound");
-      digitalWrite(loseSoundPin, LOW);
-      
+
       soundHold = true;
       soundHoldResetTimer.reset();
   }
@@ -453,6 +456,7 @@ void play_sounds() {
       digitalWrite(idleSoundPin, HIGH);
       digitalWrite(resetSoundPin, HIGH);
       digitalWrite(buzzSoundPin, HIGH);
+      digitalWrite(travelSoundPin, HIGH);
       //reenable toggle for idle
       //idleButtonDebounced = true;
     }
