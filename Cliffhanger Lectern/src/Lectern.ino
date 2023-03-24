@@ -278,12 +278,18 @@ void handle_messages() {
       break;
     case RECEIVE:
       if (messageResponseTimeoutTimer.timeUp()) {
+        messageResponseTimeoutTimer.reset();
         //set error mode
         //go to transmit
         messageSendState = TRANSMIT;
         errorFlag = true;
         messageAck = false;
-        Serial.println("no response");
+        Serial.print("no response");
+        while(Serial1.available()) {
+          Serial.print(Serial1.read(), DEC);
+        }
+        Serial.println();
+        
       } else {
         if ((unsigned)Serial1.available() >= sizeof(response_message_t)) {
           // Read in the appropriate number of bytes to fit the response
