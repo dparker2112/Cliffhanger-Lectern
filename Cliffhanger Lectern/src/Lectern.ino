@@ -135,7 +135,9 @@ bool playFallSound = false;
 bool playResetSound = false;
 bool playBuzzSound = false;
 
-bool gameOver = true;
+bool gameOver = false;
+bool travelSoundPlaying = false;
+
 
 void setup() {
   init_lectern_inputs();
@@ -252,12 +254,12 @@ void handle_messages() {
           //send new message
         }
         digitalWrite(max845_enable, HIGH);
-        delayMicroseconds(2000);
+        delayMicroseconds(1000);
         if(currentState == RESET) {
           Serial.print("reset");
         }
         Serial1.write((byte *)&messageOut, sizeof(master_message_t));
-        delayMicroseconds(2000);
+        delayMicroseconds(1000);
         digitalWrite(max845_enable, LOW);
         /*
         Serial.print("message sent ");
@@ -287,6 +289,7 @@ void handle_messages() {
         Serial.print("no response");
         while(Serial1.available()) {
           Serial.print(Serial1.read(), DEC);
+          Serial.print(" ");
         }
         Serial.println();
         
@@ -317,6 +320,8 @@ void handle_messages() {
             incomingEndState = response.endState;
             incomingTravellingState = response.travelState;
             
+            //Serial.print("trav sound: ");
+            //Serial.print(travelSoundPlaying);
             Serial.print("warning: ");
             Serial.print(incomingWarningState);
             Serial.print(" end: ");
@@ -340,18 +345,20 @@ void handle_messages() {
 * travel sound is hold-looping trigger, while idle sound is latching trigger
 */
 void play_sounds() {
-  static bool travelSoundPlaying = false;
+  //static bool travelSoundPlaying = false;
   //static bool idleSoundPlaying = false;
   //static bool idleButtonDebounced = true;
   static MillisTimer soundHoldResetTimer= { 500 };
   static bool soundHold = false;
   //handle the travel sound
-  if(playTravelSound && !playFallSound) {
+  if(playTravelSound && !playFallSound && !gameOver) {
     //play travel sound
     if(!travelSoundPlaying) {
       Serial.println("playing travel sound");
       digitalWrite(travelSoundPin, LOW);
       travelSoundPlaying = true;
+      soundHold = true;
+      soundHoldResetTimer.reset();
     }
 
   } else {
@@ -361,6 +368,8 @@ void play_sounds() {
       travelSoundPlaying = false;
       Serial.println("turn off travel sound");
       digitalWrite(travelSoundPin, LOW);
+      soundHold = true;
+      soundHoldResetTimer.reset();
     }
   }
 
@@ -385,16 +394,6 @@ void play_sounds() {
       soundHold = true;
       soundHoldResetTimer.reset();
   }
-
-
-  //handle the lose sound
-  /*if(playLoseSound == true) {
-      playLoseSound = false;
-      Serial.println("playing lose sound");
-      digitalWrite(loseSoundPin, LOW);
-      soundHold = true;
-      soundHoldResetTimer.reset();
-  }*/
 
     //handle the Buzz sound
   if(playBuzzSound == true) {
