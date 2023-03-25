@@ -288,6 +288,7 @@ void handle_messages() {
         messageAck = false;
         Serial.print("no response");
         while(Serial1.available()) {
+          delay(1);
           Serial.print(Serial1.read(), DEC);
           Serial.print(" ");
         }
