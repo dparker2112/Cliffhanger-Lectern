@@ -137,7 +137,7 @@ bool playBuzzSound = false;
 
 bool gameOver = false;
 bool travelSoundPlaying = false;
-
+bool isReset = false;
 
 void setup() {
   init_lectern_inputs();
@@ -215,18 +215,22 @@ void read_inputs() {
     if(buttonStates.reset == LOW) {
       gameOver = false;
       currentState = RESET;
+      isReset = true;
       //Serial.println("reset");
       Serial.println("play reset sound");
       playResetSound = true;
     } else if(buttonStates.random_move == LOW && !gameOver) {
       currentState = RANDOM_MOVE;
       Serial.println("random move");
+      isReset = false;
     } else if(buttonStates.space24 == LOW && !gameOver) {
       currentState = SPACE24;
       Serial.println("space24");
+      isReset = false;
     } else if(buttonStates.manual == LOW && !gameOver) {
       currentState = MANUAL;
       Serial.println("manual");
+      isReset = false;
     } else {
       currentState = NONE;
     }
@@ -288,7 +292,7 @@ void handle_messages() {
         messageAck = false;
         Serial.print("no response");
         while(Serial1.available()) {
-          delay(1);
+          delayMicroseconds(10);
           Serial.print(Serial1.read(), DEC);
           Serial.print(" ");
         }
@@ -352,7 +356,7 @@ void play_sounds() {
   static MillisTimer soundHoldResetTimer= { 500 };
   static bool soundHold = false;
   //handle the travel sound
-  if(playTravelSound && !playFallSound && !gameOver) {
+  if(playTravelSound && !playFallSound && !gameOver && !isReset) {
     //play travel sound
     if(!travelSoundPlaying) {
       Serial.println("playing travel sound");
