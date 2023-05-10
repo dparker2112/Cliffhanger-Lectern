@@ -21,12 +21,12 @@
   Perhaps another electromagnet could trigger red flashing lighting
     and a sound effect that warns that the goat is going to fall off when it passes.
 *********************************Pinouts for Sound Board***************************************
-  T01LATCH.ogg                            Travel Music - loops until pin LOW second time
+  T01HOLDL.ogg                            Travel Music - loops until pin HIGH 
   T02.ogg                                 Losing (Falling Yodel) Sound
   T03.ogg                                 Winning Sound
   T04.ogg                                 1 Ding
   T05.ogg                                 Danger Sound
-  T06LATCH.ogg                            Idle Music - loops until pin LOW second time
+  T06HOLDL.ogg                            Idle Music - loops until pin HIGH
   T07.ogg                                 Buzz
   T08.ogg                                 Reset Game Music
 */
@@ -144,6 +144,7 @@ void setup() {
   init_lectern_outputs();
   Serial.begin(115200);
   Serial1.begin(115200);
+
 }
 
 void loop() {
@@ -332,7 +333,10 @@ void handle_messages() {
             Serial.print(" end: ");
             Serial.print(incomingEndState);
             Serial.print(" travelling: ");
-            Serial.println(incomingTravellingState);
+            Serial.print(incomingTravellingState);
+            Serial.print(" gameover: ");
+            Serial.print(gameOver);
+            Serial.println();
             
             playFallSound = incomingEndState;
             playDangerSound = incomingWarningState;
@@ -351,10 +355,11 @@ void handle_messages() {
 */
 void play_sounds() {
   //static bool travelSoundPlaying = false;
-  //static bool idleSoundPlaying = false;
-  //static bool idleButtonDebounced = true;
+  static bool idleSoundPlaying = false;
+  static bool idleButtonDebounced = true;
   static MillisTimer soundHoldResetTimer= { 500 };
   static bool soundHold = false;
+  static bool resetPlaying = false;
   //handle the travel sound
   if(playTravelSound && !playFallSound && !gameOver && !isReset) {
     //play travel sound
@@ -362,8 +367,8 @@ void play_sounds() {
       Serial.println("playing travel sound");
       digitalWrite(travelSoundPin, LOW);
       travelSoundPlaying = true;
-      soundHold = true;
-      soundHoldResetTimer.reset();
+      //soundHold = true;
+      //soundHoldResetTimer.reset();
     }
 
   } else {
@@ -372,23 +377,32 @@ void play_sounds() {
       playDingSound = true;
       travelSoundPlaying = false;
       Serial.println("turn off travel sound");
-      digitalWrite(travelSoundPin, LOW);
-      soundHold = true;
-      soundHoldResetTimer.reset();
+      digitalWrite(travelSoundPin, HIGH);
+      delay(50);
+      //soundHold = true;
+      //soundHoldResetTimer.reset();
     }
   }
 
   //handle idle sound
   if(playIdleSound) {
-    soundHoldResetTimer.reset();
     playIdleSound = false;
-    //if(idleButtonDebounced) {
-      //idleButtonDebounced = false;
+    if(idleButtonDebounced) {
+      
+      if(idleSoundPlaying) {
+        idleSoundPlaying = false;
+        digitalWrite(idleSoundPin, HIGH);
+        Serial.println("idle sound stopped");
+      } else {
+        idleSoundPlaying = true;
+        digitalWrite(idleSoundPin, LOW);
+        Serial.println("idle sound started");
+      }
+      idleButtonDebounced = false;
       soundHold = true;
       soundHoldResetTimer.reset();
-      Serial.println("toggle idle sound");
-      digitalWrite(idleSoundPin, LOW);
-    //}
+      
+    }
   }
 
   //handle the win sound
@@ -410,8 +424,9 @@ void play_sounds() {
   }
 
   //handle the reset sound
-  if(playResetSound == true) {
+  if(playResetSound == true && !resetPlaying) {
       playResetSound = false;
+      resetPlaying = true;
       Serial.println("playing reset sound"); 
       digitalWrite(resetSoundPin, LOW);
       soundHold = true;
@@ -422,6 +437,11 @@ void play_sounds() {
   //handle the danger sound
   if(playDangerSound == true) {
       playDangerSound = false;
+      if(travelSoundPlaying) {
+        playTravelSound = false;
+      }
+
+      delay(4);
       Serial.println("playing danger sound"); 
       digitalWrite(dangerSoundPin, LOW);
       soundHold = true;
@@ -429,7 +449,7 @@ void play_sounds() {
   }
 
   //handle the fall sound
-  if(playFallSound == true) {
+  if(playFallSound == true && gameOver == false) {
       //disable travel sound
       if(travelSoundPlaying) {
         playTravelSound = false;
@@ -463,12 +483,13 @@ void play_sounds() {
       digitalWrite(dangerSoundPin, HIGH);
       digitalWrite(winSoundPin, HIGH);
       //digitalWrite(loseSoundPin, HIGH);
-      digitalWrite(idleSoundPin, HIGH);
+      //digitalWrite(idleSoundPin, HIGH);
       digitalWrite(resetSoundPin, HIGH);
+      resetPlaying = false;
       digitalWrite(buzzSoundPin, HIGH);
       digitalWrite(travelSoundPin, HIGH);
       //reenable toggle for idle
-      //idleButtonDebounced = true;
+      idleButtonDebounced = true;
     }
   }
 }
@@ -492,7 +513,7 @@ void init_lectern_outputs() {
   pinMode(fallSoundPin, OUTPUT);
   pinMode(winSoundPin, OUTPUT);
   pinMode(dingSoundPin, OUTPUT);
-  //pinMode(loseSoundPin, OUTPUT);
+  pinMode(resetSoundPin, OUTPUT);
   pinMode(idleSoundPin, OUTPUT);
   pinMode(dangerSoundPin, OUTPUT);
   pinMode(buzzSoundPin, OUTPUT);
@@ -505,7 +526,7 @@ void init_lectern_outputs() {
   digitalWrite(fallSoundPin, HIGH);
   digitalWrite(winSoundPin, HIGH);
   digitalWrite(dingSoundPin, HIGH);
-  //digitalWrite(loseSoundPin, HIGH);
+  digitalWrite(resetSoundPin, HIGH);
   digitalWrite(idleSoundPin, HIGH);
   digitalWrite(dangerSoundPin, HIGH);
   digitalWrite(buzzSoundPin, HIGH);
