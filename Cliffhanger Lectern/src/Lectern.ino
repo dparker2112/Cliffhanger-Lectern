@@ -145,10 +145,16 @@ void setup() {
   initLEDs();
   Serial.begin(115200);
   Serial1.begin(115200);
-
+  while(!Serial);
+  //uncomment one of these lines to test the pattern
   //startLosePattern();
   //startWinPattern();
   //startWarningPattern();
+  
+  //uncomment one of these lines to test the pattern with the sound
+  //playDangerSound = true;
+  //playFallSound = true;
+  //playWinSound = true;
 }
 
 void loop() {
