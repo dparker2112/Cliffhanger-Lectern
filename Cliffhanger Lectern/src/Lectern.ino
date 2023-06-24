@@ -145,7 +145,9 @@ void setup() {
   initLEDs();
   Serial.begin(115200);
   Serial1.begin(115200);
-  while(!Serial);
+  //while(!Serial);
+
+  
   //uncomment one of these lines to test the pattern
   //startLosePattern();
   //startWinPattern();

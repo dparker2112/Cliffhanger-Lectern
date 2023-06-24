@@ -105,7 +105,7 @@ void initLEDs() {
   warningPattern.count1 = 0;
   warningPattern.count2 = 4;        //the number of blinks between the colors
   warningPattern.interval1 = 400;
-  warningPattern.interval2 = 50;
+  warningPattern.interval2 = 50; //speed of chase
   uint16_t theaterChaseLength = 3000; //seconds for theater chase
   theaterChaseCount = theaterChaseLength/warningPattern.interval2; // The number of iterations for the theater chase
 }
