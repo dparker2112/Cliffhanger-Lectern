@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include "MillisTimer.h"
-
+#include "ledPatterns.h" 
 // Control for Cliffhanger game.  Made by David Parker nlightn0@gmail.com 04/01/2022
 
 /*
@@ -142,9 +142,13 @@ bool isReset = false;
 void setup() {
   init_lectern_inputs();
   init_lectern_outputs();
+  initLEDs();
   Serial.begin(115200);
   Serial1.begin(115200);
 
+  //startLosePattern();
+  //startWinPattern();
+  //startWarningPattern();
 }
 
 void loop() {
@@ -152,6 +156,7 @@ void loop() {
   handle_messages();
   display_error();
   play_sounds();
+  ledLoop();
 }
 
 //blinks led when communication is broken
@@ -407,6 +412,7 @@ void play_sounds() {
 
   //handle the win sound
   if(playWinSound == true) {
+      startWinPattern();
       playWinSound = false;
       Serial.println("playing win sound");
       digitalWrite(winSoundPin, LOW);
@@ -436,6 +442,7 @@ void play_sounds() {
 
   //handle the danger sound
   if(playDangerSound == true) {
+      startWarningPattern();
       playDangerSound = false;
       if(travelSoundPlaying) {
         playTravelSound = false;
@@ -451,6 +458,7 @@ void play_sounds() {
   //handle the fall sound
   if(playFallSound == true && gameOver == false) {
       //disable travel sound
+      startLosePattern();
       if(travelSoundPlaying) {
         playTravelSound = false;
       }
