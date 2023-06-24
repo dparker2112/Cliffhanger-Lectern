@@ -314,7 +314,7 @@ int ledWarningNoBlock() {
         clearBuffer();
         for (int i = 0; i < strip.numPixels(); i++) {
           if ((i + theaterChaseIndex) % 3 == 0) {
-            strip.setPixelColor(i, theaterChaseIndex < theaterChaseCount - 16 ? warningPattern.color1 : warningPattern.color2);
+            strip.setPixelColor(i, theaterChaseIndex < theaterChaseCount - N_LEDS ? warningPattern.color1 : warningPattern.color2);
           } else {
             strip.setPixelColor(i, warningPattern.color2);
           }
