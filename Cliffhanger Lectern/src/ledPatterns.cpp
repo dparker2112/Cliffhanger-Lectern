@@ -265,6 +265,7 @@ int ledLoseNoBlock() {
       Serial.println("done");
       setColor(off);
       strip.show();
+      losePattern.state = FADE_IN;
       return -1;
       break;
   }
