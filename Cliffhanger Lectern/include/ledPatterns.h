@@ -4,7 +4,7 @@
 
 
 #define PIN      14
-#define N_LEDS   16
+#define N_LEDS   39
 
 void initLEDs();
 void ledLoop();

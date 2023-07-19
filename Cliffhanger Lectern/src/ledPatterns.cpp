@@ -4,7 +4,7 @@
 
 
 //grbw adjust sequenct if colors are wrong -- i.e. rbgw
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(N_LEDS, PIN, NEO_GRBW + NEO_KHZ800);
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(N_LEDS, PIN, NEO_RGB + NEO_KHZ800);
 
 #define MAX_INTENSITY  255
 
