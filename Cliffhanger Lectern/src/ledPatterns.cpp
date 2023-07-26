@@ -78,16 +78,18 @@ int theaterChaseCount;
 uint16_t flickerOnTimes[] = {50, 10, 600, 100, 20,40,25};
 uint16_t flickerOffTimes[] = {200, 150, 30, 200, 80,30,60};
 
-
+uint32_t patternStart;
 
 void initLEDs() {
   strip.begin();
 
   winPattern.state = FADE_IN;
-  winPattern.fadeInLength = 1000;   //how long it takes to fade in
+  winPattern.fadeInLength = 300;   //how long it takes to fade in
   winPattern.fadeOutLength = 1000;  //how long it takes to fade out
-  winPattern.interval1 = 2000;      //how long transition takes
-  winPattern.interval2 = 1000;      //how long it holds before fading out
+  winPattern.interval1 = 137;       //length of bells in ms
+  winPattern.count1 = 34;           //number of rings of bell
+  winPattern.interval2 = 2000;      //how long transition takes
+  winPattern.interval3 = 1000;      //how long it holds before fading out
   winPattern.color1 = 0x0000FF00; // Initial color (green).
   winPattern.color2 = 0x000000FF; // Target color (blue).
 
@@ -112,22 +114,32 @@ void initLEDs() {
 
 
 
+void printPatternLength() {
+  Serial.print("pattern length: ");
+  Serial.print((float)(millis() - patternStart)/1000.0);
+  Serial.println("s");
+}
+
 void ledLoop(){
   switch(ledPatternState) {
     case LED_WIN:
       if(ledWinNoBlock() < 0) {
         ledPatternState = LED_OFF;
+        printPatternLength();
+
       }
       break;
     case LED_LOSE:
       if(ledLoseNoBlock() < 0) {
         ledPatternState = LED_OFF;
+        printPatternLength();
       }
 
       break;
     case LED_WARNING:
       if(ledWarningNoBlock() < 0) {
         ledPatternState = LED_OFF;
+        printPatternLength();
       }
 
       break;
@@ -139,14 +151,17 @@ void ledLoop(){
 
 void startWinPattern() {
   ledPatternState = LED_WIN;
+  patternStart = millis();
   progress = 0;
 }
 void startLosePattern() {
   ledPatternState = LED_LOSE;
+  patternStart = millis();
   progress = 0;
 }
 void startWarningPattern() {
   ledPatternState = LED_WARNING;
+  patternStart = millis();
   progress = 0;
 }
 
@@ -162,11 +177,42 @@ int ledWinNoBlock() {
         setFadeInColor(winPattern.color1, i);
       } else {
         progress = 0;
-        winPattern.state = CROSSFADE;
+        winPattern.state = ALTERNATE_COLORS;
         startTime = currentMillis;
       }
       break;
+    case ALTERNATE_COLORS:
+    
+    if (currentMillis - startTime > winPattern.interval1) {
+      startTime = currentMillis;
+      uint32_t color1, color2;
+      if(progress%2 == 0) {
+        color1 = winPattern.color1;
+        color2 = winPattern.color2;
+      } else {
+        color1 = winPattern.color2;
+        color2 = winPattern.color1;
+      }
+      progress++;
+      int chunkSize = N_LEDS/5;
+      for(int i = 0; i < N_LEDS; i = i + chunkSize) {
+        for(int j = 0; j < chunkSize; j++) {
+          uint32_t color;
+          if(i%2 == 0) {
+            color = color1;
+          } else {
+            color = color2;
+          }
+          strip.setPixelColor(i + j, color);
+        }
 
+      }
+      if(progress > winPattern.count1) {
+        progress = 0;
+        winPattern.state = CROSSFADE;
+      }
+    }
+    break;
     case CROSSFADE:
       if (currentMillis - startTime < winPattern.interval1) {
         progress = map(currentMillis - startTime, 0, winPattern.interval1, 0, 255);
@@ -274,8 +320,6 @@ int ledLoseNoBlock() {
 }
 
 
-
-
 int ledWarningNoBlock() {
   unsigned long currentMillis = millis();
   static unsigned long warningStartTime = currentMillis;
@@ -351,8 +395,6 @@ int ledWarningNoBlock() {
   }
   return 0;
 }
-
-
 
 
 uint8_t getR(uint32_t color) {
