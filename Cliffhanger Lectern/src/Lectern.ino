@@ -39,7 +39,7 @@ const int manual = 7;      //Cue 3 : Moves goat until button is released
 const int win = 8;         //Cue 4 : plays win sound
 const int buzz = 9;        //Cue 5 : plays buzz sound
 const int idle = 10;       //Cue 6 : plays idle music
-const int unused1 = 11;    //Cue 8 
+const int moveOne = 11;    //Cue 8 : Moves goat one space forward
 const int unused2 = 12;    //Cue 9
 //********************************SOUND TRIGGERS**********************************************
 const int travelSoundPin = 30;   //pin 1 on sound board : Latching Looping Trigger
