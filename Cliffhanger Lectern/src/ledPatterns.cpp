@@ -85,7 +85,7 @@ void initLEDs() {
 
   winPattern.state = FADE_IN;
   winPattern.fadeInLength = 300;   //how long it takes to fade in
-  winPattern.fadeOutLength = 1000;  //how long it takes to fade out
+  winPattern.fadeOutLength = 4000;  //how long it takes to fade out
   winPattern.interval1 = 137;       //length of bells in ms
   winPattern.count1 = 34;           //number of rings of bell
   winPattern.interval2 = 2000;      //how long transition takes
