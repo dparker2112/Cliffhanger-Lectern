@@ -71,7 +71,8 @@ typedef enum lectern_state_t {
   SPACE24 = 2,
   MANUAL = 3,
   NONE = 4,
-  NO_MESSAGE = 5
+  NO_MESSAGE = 5,
+  MOVE_1 = 6
 } lectern_state_t;
 
 
@@ -84,6 +85,7 @@ typedef struct button_state_t {
   uint8_t lose;
   uint8_t idle;
   uint8_t buzz;
+  uint8_t moveOne;
 } button_state_t;
 
 button_state_t buttonStates = {1};
@@ -193,6 +195,7 @@ void read_inputs() {
     buttonStates.random_move = digitalRead(randomMove);//Cue 1 random move space 1 - 12
     buttonStates.space24 = digitalRead(space24);   //Cue 2 go to space 24
     buttonStates.manual = digitalRead(manual);    //Cue 3 manual move
+    buttonStates.moveOne = digitalRead(moveOne);
 
     //SOUND CUES
     buttonStates.win = digitalRead(win);     //Cue 4 winning sound 1x
@@ -244,6 +247,10 @@ void read_inputs() {
     } else if(buttonStates.manual == LOW && !gameOver) {
       currentState = MANUAL;
       Serial.println("manual");
+      isReset = false;
+    } else if(buttonStates.moveOne == LOW && !gameOver) {
+      currentState = MOVE_1;
+      Serial.println("move 1 space");
       isReset = false;
     } else {
       currentState = NONE;
@@ -521,6 +528,7 @@ void init_lectern_inputs() {
   //pinMode(lose, INPUT_PULLUP);        //Cue 5 losing sound 1x
   pinMode(buzz, INPUT_PULLUP);        //Cue 5 losing sound 1x
   pinMode(idle, INPUT_PULLUP);        //Cue 6 idle music loop
+  pinMode(moveOne, INPUT_PULLUP);        //Cue 8 move one step forward
 }
 
 //initialize outputs for triggering sound
