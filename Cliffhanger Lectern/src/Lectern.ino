@@ -249,7 +249,7 @@ void read_inputs() {
       currentState = RANDOM_MOVE;
       Serial.println("random move");
       isReset = false;
-    } else if(buttonStates.random_move == LOW && secondFunctionEnabled == LOW && !gameOver) {
+    } else if(buttonStates.random_move == LOW && secondFunctionEnabled && !gameOver) {
       secondFunctionEnabled = false;
       currentState = SPACE24;
       Serial.println("space24");
