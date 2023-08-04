@@ -189,6 +189,7 @@ void display_error() {
 
 //polls the buttons to get current inputs
 void read_inputs() {
+  static bool secondFunctionEnabled = false;
   static MillisTimer inputTimer = {30};
   if(inputTimer.timeUp()) {
     inputTimer.reset();
@@ -215,6 +216,11 @@ void read_inputs() {
       //play lose sound
     }
     */ 
+    if(buttonStates.secondFunction == LOW) {
+      secondFunctionEnabled = true;
+      Serial.println("enabling second function");
+      //play win sound
+    } 
     buttonStates.idle = digitalRead(idle);    //Cue 6 idle music loop
     if(buttonStates.idle == LOW) {
       Serial.println("play idle sound");
@@ -235,14 +241,16 @@ void read_inputs() {
       gameOver = false;
       currentState = RESET;
       isReset = true;
+      secondFunctionEnabled = false;
       //Serial.println("reset");
       Serial.println("play reset sound");
       playResetSound = true;
-    } else if(buttonStates.random_move == LOW && buttonStates.secondFunction == HIGH && !gameOver) {
+    } else if(buttonStates.random_move == LOW && !secondFunctionEnabled && !gameOver) {
       currentState = RANDOM_MOVE;
       Serial.println("random move");
       isReset = false;
-    } else if(buttonStates.random_move == LOW && buttonStates.secondFunction == LOW && !gameOver) {
+    } else if(buttonStates.random_move == LOW && secondFunctionEnabled == LOW && !gameOver) {
+      secondFunctionEnabled = false;
       currentState = SPACE24;
       Serial.println("space24");
       isReset = false;
