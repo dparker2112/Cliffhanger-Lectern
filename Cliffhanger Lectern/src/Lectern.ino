@@ -34,13 +34,13 @@
 //********************************LECTERN BUTTONS*********************************************
 const int reset = 4;       //Cue 7 : Moves goat to Start of game location : resetPin
 const int randomMove = 5;  //Cue 1 : Moves goat random distance between resetPin and dangerPin
-const int space24 = 6;     //Cue 2 : Moves goat to just before dangerPin (space 24)
+const int dingSoundTriggerPin = 6;     //Cue 2 : Moves goat to just before dangerPin (space 24)
 const int manual = 7;      //Cue 3 : Moves goat until button is released
 const int win = 8;         //Cue 4 : plays win sound
 const int buzz = 9;        //Cue 5 : plays buzz sound
 const int idle = 10;       //Cue 6 : plays idle music
 const int moveOne = 11;    //Cue 8 : Moves goat one space forward
-const int unused2 = 12;    //Cue 9
+const int secondFunctionButton = 12;    //Cue 9
 //********************************SOUND TRIGGERS**********************************************
 const int travelSoundPin = 30;   //pin 1 on sound board : Latching Looping Trigger
 const int fallSoundPin = 31;     //pin 2 on sound board : Basic Trigger
@@ -79,13 +79,14 @@ typedef enum lectern_state_t {
 typedef struct button_state_t {
   uint8_t reset;
   uint8_t random_move;
-  uint8_t space24;
+  uint8_t dingSound;
   uint8_t manual;
   uint8_t win;
   uint8_t lose;
   uint8_t idle;
   uint8_t buzz;
   uint8_t moveOne;
+  uint8_t secondFunction;
 } button_state_t;
 
 button_state_t buttonStates = {1};
@@ -193,9 +194,10 @@ void read_inputs() {
     inputTimer.reset();
     buttonStates.reset = digitalRead(reset);     //Cue 7 return to home position
     buttonStates.random_move = digitalRead(randomMove);//Cue 1 random move space 1 - 12
-    buttonStates.space24 = digitalRead(space24);   //Cue 2 go to space 24
+    buttonStates.secondFunction = digitalRead(secondFunctionButton);   //Cue 2 go to space 24
     buttonStates.manual = digitalRead(manual);    //Cue 3 manual move
     buttonStates.moveOne = digitalRead(moveOne);
+    buttonStates.dingSound = digitalRead(dingSoundTriggerPin);
 
     //SOUND CUES
     buttonStates.win = digitalRead(win);     //Cue 4 winning sound 1x
@@ -236,11 +238,11 @@ void read_inputs() {
       //Serial.println("reset");
       Serial.println("play reset sound");
       playResetSound = true;
-    } else if(buttonStates.random_move == LOW && !gameOver) {
+    } else if(buttonStates.random_move == LOW && buttonStates.secondFunction == HIGH && !gameOver) {
       currentState = RANDOM_MOVE;
       Serial.println("random move");
       isReset = false;
-    } else if(buttonStates.space24 == LOW && !gameOver) {
+    } else if(buttonStates.random_move == LOW && buttonStates.secondFunction == LOW && !gameOver) {
       currentState = SPACE24;
       Serial.println("space24");
       isReset = false;
@@ -252,7 +254,12 @@ void read_inputs() {
       currentState = MOVE_1;
       Serial.println("move 1 space");
       isReset = false;
-    } else {
+    } else if(buttonStates.dingSound == LOW) {
+      currentState = NONE;
+      Serial.println("play ding sound");
+      playDingSound = true;
+
+    }else {
       currentState = NONE;
     }
     
@@ -522,9 +529,10 @@ void play_sounds() {
 void init_lectern_inputs() {
   pinMode(reset, INPUT_PULLUP);       //Cue 7 return to home position
   pinMode(randomMove, INPUT_PULLUP);  //Cue 1 random move space 1 - 12
-  pinMode(space24, INPUT_PULLUP);     //Cue 2 go to space 24
+  pinMode(secondFunctionButton, INPUT_PULLUP);     //Cue 2 go to space 24
   pinMode(manual, INPUT_PULLUP);      //Cue 3 manual move
   pinMode(win, INPUT_PULLUP);         //Cue 4 winning sound 1x
+  pinMode(dingSoundTriggerPin, INPUT_PULLUP);
   //pinMode(lose, INPUT_PULLUP);        //Cue 5 losing sound 1x
   pinMode(buzz, INPUT_PULLUP);        //Cue 5 losing sound 1x
   pinMode(idle, INPUT_PULLUP);        //Cue 6 idle music loop
